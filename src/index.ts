@@ -19,7 +19,7 @@ async function main(): Promise<void> {
   printSummary(summary);
 
   if (isOutputToFileEnabled()) {
-    await saveSummaryToFile(summary);
+    await saveSummaryToFiles(summary);
   }
 }
 
@@ -65,14 +65,30 @@ function isOutputToFileEnabled(): boolean {
   return String(process.env.OUTPUT_TO_FILE ?? "false").toLowerCase() === "true";
 }
 
-async function saveSummaryToFile(summary: string): Promise<void> {
-  const outputDirectory = resolve(process.cwd(), "output");
+async function saveSummaryToFiles(summary: string): Promise<void> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const filePath = resolve(outputDirectory, `report-${timestamp}.txt`);
+  const fileName = `report-${timestamp}.md`;
+
+  const outputDirectory = resolve(process.cwd(), "output");
+  const localFilePath = resolve(outputDirectory, fileName);
 
   await mkdir(outputDirectory, { recursive: true });
-  await writeFile(filePath, summary, "utf8");
-  console.log(`Relatório salvo em: ${filePath}`);
+  await writeFile(localFilePath, summary, "utf8");
+  console.log(`Relatório salvo em: ${localFilePath}`);
+
+  const obsidianVaultPath = process.env.OBSIDIAN_VAULT_PATH?.trim();
+  if (!obsidianVaultPath) {
+    console.warn(
+      'Aviso: "OBSIDIAN_VAULT_PATH" não foi definido. O relatório foi salvo apenas em output/.'
+    );
+    return;
+  }
+
+  const dailyReportsDirectory = resolve(obsidianVaultPath, "Daily Reports");
+  const obsidianFilePath = resolve(dailyReportsDirectory, fileName);
+  await mkdir(dailyReportsDirectory, { recursive: true });
+  await writeFile(obsidianFilePath, summary, "utf8");
+  console.log(`Relatório salvo no Obsidian em: ${obsidianFilePath}`);
 }
 
 main().catch((error: unknown) => {

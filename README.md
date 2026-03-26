@@ -33,6 +33,7 @@ NOTION_TOKEN=secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 OUTPUT_TO_FILE=false
+OBSIDIAN_VAULT_PATH=/absolute/path/to/your/obsidian/vault
 ```
 
 Run locally:
@@ -68,7 +69,8 @@ If your database uses different names/labels, update `src/notion/fetchDatabase.t
 
 - **Status property/labels**: edit `src/notion/fetchDatabase.ts`.
 - **Output language/tone**: edit the system prompt in `src/claude/summarize.ts`.
-- **File output toggle**: set `OUTPUT_TO_FILE=true` to save reports in `output/`.
+- **File output toggle**: set `OUTPUT_TO_FILE=true` to save Markdown reports in `output/` and in your Obsidian vault `Daily Reports/`.
+- **Obsidian destination**: set `OBSIDIAN_VAULT_PATH` to your vault absolute path.
 
 ## Project structure
 

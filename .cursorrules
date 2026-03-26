@@ -41,5 +41,5 @@
 
 ## Output
 - Terminal output should be clean and readable with section separators.
-- If OUTPUT_TO_FILE=true, save to output/report-{ISO_DATE}.txt.
+- If OUTPUT_TO_FILE=true, save to output/report-{ISO_DATE}.md and also to Obsidian folder Daily Reports.
 - Never overwrite a previous report; always use a timestamped filename.
