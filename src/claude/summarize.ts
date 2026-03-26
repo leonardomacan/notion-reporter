@@ -10,7 +10,7 @@ Gere um resumo em português claro e natural, no seguinte formato:
 - O que ainda está no backlog
 - O que já foi concluído
 
-Seja objetivo, profissional e use primeira pessoa. Não invente informações que não estejam nos dados.`;
+Seja objetivo, profissional e use primeira pessoa. Não invente informações que não estejam nos dados. Não use emojis ou símbolos decorativos; use apenas texto em PT-BR.`;
 
 /**
  * Sends grouped task data to Claude and returns a natural language PT-BR summary.

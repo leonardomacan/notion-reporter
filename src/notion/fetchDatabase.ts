@@ -5,10 +5,21 @@ import { getNotionClient } from "./client";
 const STATUS_PROPERTY_NAME = "Status";
 const TITLE_PROPERTY_NAME = "Nome";
 
+function normalizeStatusLabel(label: string): string {
+  return label
+    .normalize("NFD")
+    // Remove diacritics (accents) so minor wording differences still map correctly.
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
 const STATUS_MAP: Record<string, TaskStatus> = {
-  "Não iniciado": "nao_iniciado",
-  "Em andamento": "em_andamento",
-  Concluído: "concluido"
+  [normalizeStatusLabel("Não iniciado")]: "nao_iniciado",
+  [normalizeStatusLabel("Não iniciada")]: "nao_iniciado",
+  [normalizeStatusLabel("Em andamento")]: "em_andamento",
+  [normalizeStatusLabel("Concluído")]: "concluido"
 };
 
 /**
@@ -123,5 +134,5 @@ function extractStatus(property: any): TaskStatus | null {
   if (!label) {
     return null;
   }
-  return STATUS_MAP[label] ?? null;
+  return STATUS_MAP[normalizeStatusLabel(label)] ?? null;
 }

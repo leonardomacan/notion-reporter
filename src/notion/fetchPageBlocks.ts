@@ -34,11 +34,14 @@ async function fetchChildrenLines(notion: ReturnType<typeof getNotionClient>, bl
         numberedIndex = 1;
       }
 
-      if (formattedLine) {
+      if (formattedLine !== null) {
         const indent = "  ".repeat(depth);
         allLines.push(`${indent}${formattedLine}`);
       } else {
-        console.warn(`Aviso: bloco não suportado (${block.type}) em ${block.id}. Ignorando.`);
+        const intentionallySkippedTypes = new Set(["link_preview", "table"]);
+        if (!intentionallySkippedTypes.has(block.type)) {
+          console.warn(`Aviso: bloco não suportado (${block.type}) em ${block.id}. Ignorando.`);
+        }
       }
 
       if (block.has_children) {

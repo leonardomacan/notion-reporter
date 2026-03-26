@@ -32,6 +32,18 @@ export function formatBlockLine(block: any, numberedIndex?: number): string | nu
       return `> ${extractRichTextPlain(block.quote.rich_text)}`;
     case "toggle":
       return `- ${extractRichTextPlain(block.toggle.rich_text)}`;
+    case "table_row": {
+      const cells: Array<Array<{ plain_text?: string }>> = block.table_row?.cells ?? [];
+      const cellTexts = cells.map((cell) => extractRichTextPlain(cell)).filter((t) => t);
+      // Flatten each table row so Claude can still read table content.
+      return cellTexts.length ? `| ${cellTexts.join(" | ")} |` : "";
+    }
+    case "table":
+      // The table wrapper doesn't contain the actual row contents; skip to avoid noise.
+      return null;
+    case "link_preview":
+      // We use link previews only as pointers elsewhere; no need to include content in the summary.
+      return null;
     default:
       return null;
   }
