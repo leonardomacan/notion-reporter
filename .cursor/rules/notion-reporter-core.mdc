@@ -1,0 +1,58 @@
+---
+description: Core project standards for notion-reporter
+alwaysApply: true
+---
+
+# notion-reporter — Core Rules
+
+## Language & Runtime
+- TypeScript only. No plain JS files in `/src`.
+- Node.js 18+. Use native `fetch` where possible; fall back to SDK methods.
+- All async functions must use `async/await`. No raw Promise chains.
+
+## Architecture
+- Keep API logic isolated: Notion calls live in `src/notion/`, Claude calls in `src/claude/`.
+- `src/index.ts` only orchestrates — no API calls directly in the entry point.
+- All shared types go in `src/types/index.ts`. No inline type declarations in logic files.
+
+## Security
+- Never hardcode API keys, tokens, or IDs. Always read from `process.env`.
+- Never log `.env` values to the console, even for debugging.
+- If an env var is missing at startup, throw a descriptive error and exit early.
+- Do not commit `.env`. If new vars are added, update `.env.example`.
+
+## Error Handling
+- Wrap all API calls in `try/catch` with meaningful error messages.
+- If a Notion page has no block content, skip it gracefully and log a warning.
+- If the Claude API call fails, output the raw structured data as a fallback instead of crashing.
+
+## Code Style
+- Use named exports. No default exports except in `src/index.ts`.
+- Functions should do one thing. Max 40 lines per function; extract helpers if needed.
+- Use descriptive variable names. No abbreviations like `db`, `pg`, `blk`.
+- Add a JSDoc comment to every exported function explaining what it does and what it returns.
+
+## Notion API
+- Always handle pagination (`has_more` + `next_cursor`) when querying the database.
+- When fetching blocks, recurse into child blocks only if `has_children === true`.
+- Supported block types to parse:
+  - paragraph
+  - heading_1 / heading_2 / heading_3
+  - bulleted_list_item
+  - numbered_list_item
+  - to_do
+  - toggle
+  - callout
+  - quote
+- Log and skip unsupported types.
+
+## Claude API
+- Model: `claude-sonnet-4-20250514`
+- Always send a well-structured system prompt in Portuguese.
+- Include the full task data as a JSON block inside the user message.
+- Keep `max_tokens` at 1024 for summaries.
+
+## Output
+- Terminal output should be clean and readable with section separators.
+- If `OUTPUT_TO_FILE=true`, save to `output/report-{ISO_DATE}.md` and also to the Obsidian folder Daily Reports.
+- Never overwrite a previous report; always use a timestamped filename.
