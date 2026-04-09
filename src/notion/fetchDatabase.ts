@@ -1,9 +1,11 @@
 import { isFullPage } from "@notionhq/client";
 import type { GroupedTasks, Task, TaskStatus } from "../types";
 import { getNotionClient } from "./client";
+import { getCompletedTaskCutoffDate } from "../utils/dateFilter";
 
 const STATUS_PROPERTY_NAME = "Status";
 const TITLE_PROPERTY_NAME = "Nome";
+const COMPLETED_STATUS_LABEL = "Concluído";
 
 function normalizeStatusLabel(label: string): string {
   return label
@@ -22,6 +24,29 @@ const STATUS_MAP: Record<string, TaskStatus> = {
   [normalizeStatusLabel("Concluído")]: "concluido"
 };
 
+function buildCompletedTaskFilter(cutoff: Date): object {
+  return {
+    or: [
+      {
+        property: STATUS_PROPERTY_NAME,
+        status: { does_not_equal: COMPLETED_STATUS_LABEL }
+      },
+      {
+        and: [
+          {
+            property: STATUS_PROPERTY_NAME,
+            status: { equals: COMPLETED_STATUS_LABEL }
+          },
+          {
+            timestamp: "last_edited_time",
+            last_edited_time: { on_or_after: cutoff.toISOString() }
+          }
+        ]
+      }
+    ]
+  };
+}
+
 /**
  * Queries the Notion database with pagination and groups tasks by normalized status.
  * Returns grouped tasks with id, title, and status.
@@ -33,6 +58,9 @@ export async function fetchDatabaseTasksGrouped(): Promise<GroupedTasks> {
     throw new Error("NOTION_DATABASE_ID não foi definido.");
   }
 
+  const cutoff = getCompletedTaskCutoffDate(process.env.COMPLETED_TASK_MAX_AGE_DAYS);
+  const filter = buildCompletedTaskFilter(cutoff);
+
   const groupedTasks: GroupedTasks = {
     nao_iniciado: [],
     em_andamento: [],
@@ -41,7 +69,7 @@ export async function fetchDatabaseTasksGrouped(): Promise<GroupedTasks> {
 
   let nextCursor: string | null | undefined = undefined;
   do {
-    const response = await queryDatabasePage(notion, notionDatabaseId, nextCursor ?? undefined);
+    const response = await queryDatabasePage(notion, notionDatabaseId, filter, nextCursor ?? undefined);
 
     for (const result of response.results) {
       if (!isFullPage(result)) {
@@ -88,10 +116,11 @@ function mapNotionPageToTask(page: Parameters<typeof isFullPage>[0] & { properti
   };
 }
 
-async function queryDatabasePage(notion: any, databaseId: string, startCursor?: string): Promise<any> {
+async function queryDatabasePage(notion: any, databaseId: string, filter: object, startCursor?: string): Promise<any> {
   if (notion.databases?.query) {
     return notion.databases.query({
       database_id: databaseId,
+      filter,
       start_cursor: startCursor
     });
   }
@@ -104,6 +133,7 @@ async function queryDatabasePage(notion: any, databaseId: string, startCursor?: 
     }
     return notion.dataSources.query({
       data_source_id: firstDataSourceId,
+      filter,
       start_cursor: startCursor
     });
   }
