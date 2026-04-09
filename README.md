@@ -34,6 +34,7 @@ NOTION_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 OUTPUT_TO_FILE=false
 OBSIDIAN_VAULT_PATH=/absolute/path/to/your/obsidian/vault
+COMPLETED_TASK_MAX_AGE_DAYS=7
 ```
 
 Run locally:
@@ -71,6 +72,7 @@ If your database uses different names/labels, update `src/notion/fetchDatabase.t
 - **Output language/tone**: edit the system prompt in `src/claude/summarize.ts`.
 - **File output toggle**: set `OUTPUT_TO_FILE=true` to save Markdown reports in `output/` and in your Obsidian vault `Daily Reports/`.
 - **Obsidian destination**: set `OBSIDIAN_VAULT_PATH` to your vault absolute path.
+- **Completed task age filter**: set `COMPLETED_TASK_MAX_AGE_DAYS` to control how many days back completed tasks are included (default: `7`). Completed tasks older than this are excluded before any block content is fetched, saving Notion API calls and Claude tokens.
 
 ## Project structure
 
